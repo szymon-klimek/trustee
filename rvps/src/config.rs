@@ -27,3 +27,29 @@ impl Config {
         Ok(res)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Config;
+    use key_value_storage::KeyValueStorageType;
+
+    #[test]
+    fn docker_compose_default_rvps_config_is_correct() {
+        let config_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../kbs/config/docker-compose/rvps.json");
+        let config = Config::from_file(config_path.to_str().unwrap())
+            .expect("Docker Compose RVPS config should be valid");
+
+        assert_eq!(config.storage.storage_type, KeyValueStorageType::LocalFs);
+        assert_eq!(
+            config
+                .storage
+                .backends
+                .local_fs
+                .as_ref()
+                .expect("LocalFs backend should be configured")
+                .dir_path,
+            "/opt/confidential-containers/attestation-service/reference_values"
+        );
+    }
+}

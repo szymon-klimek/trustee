@@ -727,6 +727,26 @@ mod tests {
     }
 
     #[test]
+    fn kubernetes_default_kbs_config_is_correct() {
+        let config_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("config/kubernetes/base/kbs-config.toml");
+        let config = KbsConfig::try_from(config_path.as_path())
+            .expect("Kubernetes base KBS config should be valid");
+
+        assert_eq!(config.storage_backend.storage_type, KeyValueStorageType::LocalFs);
+        assert_eq!(
+            config
+                .storage_backend
+                .backends
+                .local_fs
+                .as_ref()
+                .expect("LocalFs backend should be configured")
+                .dir_path,
+            "/opt/confidential-containers/kbs"
+        );
+    }
+
+    #[test]
     fn config_load_error_includes_path_and_section_hint() {
         let dir = tempfile::tempdir().expect("tempdir");
         let path = dir.path().join("kbs.toml");
